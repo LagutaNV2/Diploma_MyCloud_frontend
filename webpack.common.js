@@ -9,6 +9,7 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'js/[name].[contenthash].js',
     publicPath: '/',
+    clean: true, // Очищать папку dist при сборке
     assetModuleFilename: 'assets/[hash][ext][query]'
   },
   resolve: {
