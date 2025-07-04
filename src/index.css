@@ -85,12 +85,20 @@ input:focus, textarea:focus {
 table {
   border-collapse: collapse;
   width: 100%;
+  table-layout: fixed;
 }
 
 th, td {
   border: 1px solid #e2e8f0;
   padding: 0.75rem;
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+td {
+  position: relative; /* Для позиционирования кнопок */
 }
 
 thead th {
@@ -103,7 +111,56 @@ thead th {
 tr:hover {
   background-color: #f8fafc;
 }
+td:last-child {
+  min-width: 150px;
+}
 
+.actions-column {
+  position: relative; /*  */
+  white-space: normal;
+  word-break: break-word;
+}
+
+.react-icons {
+  font-size: 0.5rem;
+  color: #333;
+}
+
+.react-icons:hover {
+  color: #007bff;
+}
+
+/* Стиль для кнопки удаления юзера */
+.delete-button {
+  position: absolute; /* relative; */
+  top: 50%;
+  right: 0; 
+  transform: translateY(-50%);
+  display: inline-block;
+}
+.delete-button svg {
+  color: red;
+}
+.delete-button span {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background-color: #dc2626;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  opacity: 0;
+  /* transition: opacity 0.3s ease; */
+  pointer-events: none;
+  z-index: 10;
+}
+
+.delete-button:hover span {
+  opacity: 1;
+}
 /* Для полосатой таблицы */
 tbody tr:nth-child(even) {
   background-color: #f8fafc;
@@ -111,4 +168,12 @@ tbody tr:nth-child(even) {
 
 tbody tr:hover {
   background-color: #ebf8ff;
+}
+
+/* Ошибки */
+.error-text {
+  color: red;
+  font-weight: bold;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }

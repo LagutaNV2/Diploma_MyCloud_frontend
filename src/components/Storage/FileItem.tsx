@@ -1,10 +1,10 @@
 // src/components/Storage/FileItem.tsx
 
 import React, { useState } from 'react';
-import { FaCopy, FaCheck } from 'react-icons/fa';
+import { FaCopy, FaCheck, FaEdit, FaTimes  } from 'react-icons/fa';
 import type { File } from '../../types/fileTypes';
-import { useAppDispatch } from '../../store/hooks';
-import { deleteFile, downloadFile } from '../../store/slices/fileSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { deleteFile, downloadFile, updateFile, previewFile } from '../../store/slices/fileSlice';
 
 interface FileItemProps {
   file: File;
@@ -24,8 +24,11 @@ const formatDate = (dateString: string) => {
 
 const FileItem: React.FC<FileItemProps> = ({ file }) => {
   const [copied, setCopied] = useState(false);
-  const [comment, setComment] = useState(file.comment);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newName, setNewName] = useState(file.original_name);
+  const [isEditingComment, setIsEditingComment] = useState(false);
+  const [newComment, setNewComment] = useState(file.comment);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const dispatch = useAppDispatch();
 
   const handleDownload = () => {
@@ -38,55 +41,159 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
     }
   };
 
+  const handleRename = async () => {
+    if (newName.trim() === '') {
+      alert('Имя файла не может быть пустым');
+      return;
+    }
+    try {
+      await dispatch(updateFile({ fileId: file.id, updatedData: { original_name: newName } })).unwrap();
+      setIsRenaming(false);
+    } catch (err) {
+      alert('Ошибка при переименовании файла');
+    }
+  };
+
+  const handleCommentUpdate = async () => {
+    try {
+      await dispatch(updateFile({ fileId: file.id, updatedData: { comment: newComment } })).unwrap();
+      setIsEditingComment(false);
+    } catch (err) {
+      alert('Ошибка при обновлении комментария');
+    }
+  };
+
+  const handlePreview = async () => {
+    try {
+      const url = await dispatch(previewFile({ fileId: file.id })).unwrap();
+      setPreviewUrl(url);
+      window.open(url, '_blank'); // Открывает файл в новой вкладке
+    } catch (err) {
+      alert('Ошибка при попытке просмотреть файл');
+    }
+  };
+
   const copyPublicLink = () => {
     const publicUrl = `${window.location.origin}/api/storage/public/${file.public_link}/`;
     navigator.clipboard.writeText(publicUrl);
-    // alert('Публичная ссылка скопирована в буфер обмена');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <tr className="hover:bg-blue-50 transition-colors duration-150">
-      <td className="font-medium">{file.original_name}</td>
-      <td className="py-2 px-4 border-b border-r border-gray-100">
-        {isEditing ? (
-          <input
-            type="text"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            className="border rounded p-1"
-          />
+      {/* Имя файла */}
+      <td>
+        {isRenaming ? (
+          <div className="flex items-center justify-between">
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              className="border rounded p-1 mr-2 flex-grow"
+            />
+             <div className="flex items-center space-x-2">
+              <button
+                onClick={handleRename}
+                className="bg-green-500 text-white px-2 py-1 rounded flex items-center"
+              >
+                <FaCheck className="mr-1" />
+              </button>
+              <button
+                onClick={() => setIsRenaming(false)}
+                className="bg-gray-300 text-gray-700 px-2 py-1 rounded flex items-center"
+              >
+                <FaTimes className="mr-1" />
+              </button>
+            </div>
+          </div>
         ) : (
-          comment || <span className="text-gray-400 italic">Нет комментария</span>
+          <div className="flex items-center justify-between">
+            <div>{file.original_name}</div>
+            <button
+              onClick={() => setIsRenaming(true)}
+              className="ml-auto text-blue-500 hover:text-blue-700"
+            >
+              <FaEdit />
+            </button>
+          </div>
         )}
       </td>
+
+      {/* Комментарий */}
+      <td>
+        {isEditingComment ? (
+          <div className="flex items-center justify-between">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="border rounded p-1 mr-2 flex-grow"
+            />
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handleCommentUpdate}
+                className="bg-green-500 text-white px-2 py-1 rounded flex items-center"
+              >
+                <FaCheck className="mr-1" />
+              </button>
+              <button
+                onClick={() => setIsEditingComment(false)}
+                className="bg-gray-300 text-gray-700 px-2 py-1 rounded flex items-center"
+              >
+                <FaTimes className="mr-1" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div>{file.comment || 'Нет комментария'}</div>
+            <button
+              onClick={() => setIsEditingComment(true)}
+              className="ml-auto text-blue-500 hover:text-blue-700"
+            >
+              <FaEdit />
+            </button>
+          </div>
+        )}
+      </td>
+
+      {/* Размер файла, дата загрузки и последнего скачивания */}
       <td>{formatBytes(file.size)}</td>
       <td className="whitespace-nowrap">{formatDate(file.upload_date)}</td>
       <td className="whitespace-nowrap">
         {file.last_download ? formatDate(file.last_download) : 'еще не скачивался'}
       </td>
+
+      {/* Публичная ссылка */}
       <td>
-        <div className="flex items-center">
-          <span className="text-blue-600 break-all mr-2 truncate max-w-xs">
+        <div className="flex items-center justify-between">
+          <div className="text-blue-600 break-all mr-2 truncate max-w-xs">
             {file.public_link.toString().slice(0, 20)}...
-          </span>
+          </div>
           <button
             onClick={copyPublicLink}
-            className="text-blue-500 hover:text-blue-700"
+            className="text-blue-500 hover:text-blue-700 ml-auto"
             title="Скопировать публичную ссылку"
           >
             {copied ? <FaCheck className="text-green-500" /> : <FaCopy />}
           </button>
         </div>
       </td>
-      <td>
-        <div className="flex space-x-2">
+
+      {/* Действия */}
+      <td className="actions-column">
+        <div className="flex flex-col space-y-2">
           <button
             onClick={handleDownload}
             className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
           >
             Скачать
+          </button>
+          <button
+            onClick={handlePreview}
+            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+          >
+            Просмотреть
           </button>
           <button
             onClick={handleDelete}

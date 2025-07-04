@@ -2,7 +2,6 @@
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-// import axios from '../../utils/apiUtils';
 import api from '../../utils/apiUtils';
 import type { File } from '../../types/fileTypes';
 import type { RootState } from '../store';
@@ -77,6 +76,28 @@ export const downloadFile = createAsyncThunk(
   }
 );
 
+export const updateFile = createAsyncThunk(
+  'files/update',
+  async ({ fileId, updatedData }: { fileId: string; updatedData: Partial<File> }, thunkAPI) => {
+    try {
+      const response = await api.patch(`/storage/files/${fileId}/update/`, updatedData);
+      return response.data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response?.data || 'Ошибка обновления файла');
+    }
+  }
+);
+
+export const previewFile = createAsyncThunk(
+  'files/preview',
+  async ({ fileId }: { fileId: string }) => {
+    const response = await api.get(`/storage/files/${fileId}/preview/`, {
+      responseType: 'blob',
+    });
+    return URL.createObjectURL(new Blob([response.data as Blob]));
+  }
+);
+
 const fileSlice = createSlice({
   name: 'files',
   initialState,
@@ -120,9 +141,18 @@ const fileSlice = createSlice({
       })
       .addCase(deleteFile.fulfilled, (state, action: PayloadAction<string>) => {
         state.files = state.files.filter(file => file.id !== action.payload);
+      })
+      .addCase(updateFile.fulfilled, (state, action: PayloadAction<File>) => {
+        const index = state.files.findIndex(file => file.id === action.payload.id);
+        if (index !== -1) {
+          state.files[index] = action.payload;
+        }
+      })
+      .addCase(updateFile.rejected, (state, action) => {
+        state.error = action.error.message || 'Ошибка обновления файла';
       });
-  },
-});
+    },
+  });
 
 export const { setUploadProgress, updateFileLastDownload } = fileSlice.actions;
 export default fileSlice.reducer;

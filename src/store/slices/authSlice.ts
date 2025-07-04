@@ -65,16 +65,16 @@ export const checkAuth = createAsyncThunk('auth/check', async () => {
 
 export const registerUser = createAsyncThunk(
   'auth/register',
-  async (userData: RegisterData, thunkAPI) => {
+  async (userData: RegisterData, { rejectWithValue }) => {
     try {
-      await getCSRFToken(); // Получаем CSRF токен перед регистрацией
+      await getCSRFToken();
       const response = await api.post('/auth/register/', userData);
       return response.data;
     } catch (err: any) {
-      if (err.response && err.response.data) {
-        return thunkAPI.rejectWithValue(err.response.data);
-      }
-      return thunkAPI.rejectWithValue('Ошибка регистрации');
+        if (err.response?.data) {
+          return rejectWithValue(err.response.data);
+        }
+        return rejectWithValue('Unknown registration error');
     }
   }
 
@@ -112,11 +112,13 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.isAuthenticated = true;
         state.loading = false;
-        // window.location.href = '/storage';
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload
+        // state.error = typeof action.payload === 'string'
+        //   ? action.payload
+        //   : (action.error.message ?? null);
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;

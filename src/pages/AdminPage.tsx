@@ -11,7 +11,6 @@ const AdminPage: React.FC = () => {
   const dispatch = useAppDispatch();
   interface AuthState {
     user: User | null;
-    // ...
   }
 
   // const { user }: { user: User | null } = useAppSelector((state: RootState): AuthState => state.auth);

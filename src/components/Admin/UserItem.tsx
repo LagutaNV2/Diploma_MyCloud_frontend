@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FaTimes  } from 'react-icons/fa';
 import type { User } from '../../types/userTypes';
 import { formatBytes } from '../../utils/formatUtils';
 import { useAppDispatch } from '../../store/hooks';
@@ -10,14 +11,6 @@ import { updateUser, deleteUser } from '../../store/slices/userSlice';
 interface UserItemProps {
   user: User;
 }
-
-// const formatBytes = (bytes: number, decimals = 2) => {
-//   if (bytes === 0) return '0 Bytes';
-//   const k = 1024;
-//   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-//   const i = Math.floor(Math.log(bytes) / Math.log(k));
-//   return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
-// };
 
 const UserItem: React.FC<UserItemProps> = ({ user }) => {
   const [isAdmin, setIsAdmin] = useState(user.is_admin);
@@ -63,20 +56,26 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
         />
       </td>
       <td className="py-2 px-4 border-b">{user.file_count}</td>
-      {/* <td className="py-2 px-4 border-b">{formatBytes(user.formatted_total_file_size ?? 0)}</td> */}
       <td className="py-2 px-4 border-b">{(user.formatted_total_file_size ?? 0)}</td>
-      <td className="py-2 px-4 border-b space-x-2">
-        <Link
-          to={`/storage?user=${user.id}`}
-          className="text-blue-600 hover:underline">
-          Хранилище
-        </Link>
-        <button
-          onClick={handleDelete}
-          className="text-red-600 hover:text-red-800"
-        >
-          Удалить
-        </button>
+
+      {/* Действия */}
+      {/* <td className="py-2 px-4 border-b relative"> */}
+      <td className="actions-column">
+        <div className="relative">
+          <Link
+            to={`/storage?user=${user.id}`}
+            className="text-blue-600 hover:underline"
+          >
+            Хранилище
+          </Link>
+          <button
+            onClick={handleDelete}
+            className="absolute top-1/2 right-0 transform -translate-y-1/2 text-red-600 hover:text-red-800 delete-button"
+            title="Удалить пользователя"
+          >
+            <FaTimes className="text-lg" />
+          </button>
+        </div>
       </td>
     </tr>
   );

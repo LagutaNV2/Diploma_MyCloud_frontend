@@ -22,12 +22,6 @@ export const fetchUsers = createAsyncThunk<User[], void, { rejectValue: string }
   async (_, thunkAPI) => {
     try {
       const response = await axios.get('/auth/users/');
-      // return response.data;
-      // const users = response.data as any[];
-      // return users.map((user: any) => ({
-      //         ...user,
-      //         formatted_total_file_size: user.formatted_total_file_size || '0 B',
-      // }));
       return response.data.results || response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data?.detail || 'Ошибка загрузки пользователей');
