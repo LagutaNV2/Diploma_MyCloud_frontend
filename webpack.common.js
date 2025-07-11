@@ -8,7 +8,9 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'js/[name].[contenthash].js',
-    publicPath: '/',
+    // publicPath: '/',
+    // publicPath: '/Diploma_MyCloud_frontend/',
+    publicPath: process.env.PUBLIC_PATH || '/', // динамический
     clean: true, // Очищать папку dist при сборке
     assetModuleFilename: 'assets/[hash][ext][query]'
   },

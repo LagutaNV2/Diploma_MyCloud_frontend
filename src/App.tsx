@@ -4,14 +4,10 @@ import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/UI/Layout';
 import ProtectedRoute from './components/UI/ProtectedRoute';
-import Loader from './components/UI/Loader'; // компонент загрузки
+import Loader from './components/UI/Loader';
 
 // Динамические импорты для страниц
 // import HomePage from './pages/HomePage';
-// import LoginPage from './pages/LoginPage';
-// import RegisterPage from './pages/RegisterPage';
-// import StoragePage from './pages/StoragePage';
-// import AdminPage from './pages/AdminPage';
 const HomePage = React.lazy(() => import('./pages/HomePage'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage'));
 const RegisterPage = React.lazy(() => import('./pages/RegisterPage'));
