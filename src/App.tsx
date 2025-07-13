@@ -1,5 +1,3 @@
-// cloud_storage/frontend/src/App.tsx
-
 import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/UI/Layout';

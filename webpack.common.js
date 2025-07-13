@@ -1,4 +1,3 @@
-//  frontend/webpack.common.js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -8,8 +7,6 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'js/[name].[contenthash].js',
-    // publicPath: '/',
-    // publicPath: '/Diploma_MyCloud_frontend/',
     publicPath: process.env.PUBLIC_PATH || '/', // динамический
     clean: true, // Очищать папку dist при сборке
     assetModuleFilename: 'assets/[hash][ext][query]'

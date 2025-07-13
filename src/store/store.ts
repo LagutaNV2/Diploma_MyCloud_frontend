@@ -1,5 +1,3 @@
-// cloud_storage/frontend/src/store/store.ts
-
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
 import fileReducer from './slices/fileSlice';

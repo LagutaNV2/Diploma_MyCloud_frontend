@@ -1,5 +1,3 @@
-// src/pages/AdminPage.tsx
-
 import React, { useEffect } from 'react';
 import UserList from '../components/Admin/UserList';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -13,7 +11,6 @@ const AdminPage: React.FC = () => {
     user: User | null;
   }
 
-  // const { user }: { user: User | null } = useAppSelector((state: RootState): AuthState => state.auth);
   const { user } = useAppSelector((state: RootState) => state.auth);
 
   useEffect(() => {
@@ -28,7 +25,6 @@ const AdminPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto py-8">
-      {/* <h1 className="text-2xl font-bold mb-6">Администрирование пользователей</h1> */}
       <h1 className="text-2xl font-bold mb-6">
         Администрирование ({user?.username})
       </h1>

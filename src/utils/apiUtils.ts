@@ -1,11 +1,11 @@
-// File: cloud_storage/frontend/src/utils/apiUtils.ts
-
 import axios from 'axios';
-
 
 const api = axios.create({
   baseURL: process.env.API_BASE_URL || '/api',
   withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 
@@ -17,9 +17,9 @@ api.interceptors.response.use(
       console.error('Unauthorized access - redirecting to login');
       window.location.href = '/login';
     } else if (error.response?.status === 403) {
-      console.error('Forbidden access - check permissions');
+      console.error('Forbidden:', error.response.data);
     } else {
-      console.error('API error:', error.message);
+      console.error('API error:', error.response?.data || error.message);
     }
     return Promise.reject(error);
   }
@@ -34,16 +34,38 @@ export const getCSRFToken = async () => {
   }
 };
 
+interface GetCookie {
+  (name: string): string | null;
+}
+
+const getCookie: GetCookie = (name: string): string | null => {
+  const match: RegExpMatchArray | null = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? match[2] : null;
+};
+
 // Перехватчик для обработки CSRF
 api.interceptors.request.use((config) => {
-  const token = document.cookie
-    .split('; ')
-    .find(row => row.startsWith('csrftoken='))
-    ?.split('=')[1];
+  console.log('Request Headers:', config.headers);
+
+  // const token = document.cookie
+  //   .split('; ')
+  //   .find(row => row.startsWith('csrftoken='))
+  //   ?.split('=')[1];
+  const token = getCookie('csrftoken');
 
   if (token && ['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
-    config.headers = config.headers || {};
-    config.headers['X-CSRFToken'] = token;
+    // config.headers = {...config.headers, 'X-CSRFToken': token, 'Content-Type': 'application/json',};
+    if (!(config.headers?.['Content-Type']?.startsWith('multipart/form-data'))) {
+        config.headers = {
+          ...config.headers,
+          'Content-Type': 'application/json',
+        };
+    }
+
+    config.headers = {
+      ...config.headers,
+      'X-CSRFToken': token,
+    };
   }
   return config;
 });

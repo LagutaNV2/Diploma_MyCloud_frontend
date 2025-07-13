@@ -1,5 +1,3 @@
-// src/pages/RegisterPage.tsx
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../store/hooks';
@@ -77,13 +75,6 @@ const RegisterPage: React.FC = () => {
         if (backendErrors.username[0]) {
           newErrors.username = backendErrors.username[0];
         }
-
-        // Обработка ошибки email
-        // if (backendErrors.email) {
-        //   newErrors.email = Array.isArray(backendErrors.email)
-        //     ? backendErrors.email.join(' ')
-        //     : backendErrors.email;
-        // }
 
         // Обработка других ошибок
         if (backendErrors.non_field_errors) {

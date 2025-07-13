@@ -1,5 +1,3 @@
-// cloud_storage/frontend/src/types/fileTypes.ts
-
 export interface File {
   id: string;
   original_name: string;

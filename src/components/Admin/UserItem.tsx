@@ -1,5 +1,3 @@
-// src/components/Admin/UserItem.tsx
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaTimes  } from 'react-icons/fa';
@@ -59,7 +57,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
       <td className="py-2 px-4 border-b">{(user.formatted_total_file_size ?? 0)}</td>
 
       {/* Действия */}
-      {/* <td className="py-2 px-4 border-b relative"> */}
+
       <td className="actions-column">
         <div className="relative">
           <Link

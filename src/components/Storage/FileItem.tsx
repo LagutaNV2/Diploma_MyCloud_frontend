@@ -1,5 +1,3 @@
-// src/components/Storage/FileItem.tsx
-
 import React, { useState } from 'react';
 import { FaCopy, FaCheck, FaEdit, FaTimes  } from 'react-icons/fa';
 import type { File } from '../../types/fileTypes';
@@ -29,7 +27,9 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
   const [isEditingComment, setIsEditingComment] = useState(false);
   const [newComment, setNewComment] = useState(file.comment);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const dispatch = useAppDispatch();
+
 
   const handleDownload = () => {
     dispatch(downloadFile({ fileId: file.id, fileName: file.original_name }));
@@ -75,9 +75,47 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
 
   const copyPublicLink = () => {
     const publicUrl = `${window.location.origin}/api/storage/public/${file.public_link}/`;
-    navigator.clipboard.writeText(publicUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+    // navigator.clipboard.writeText(publicUrl);
+    // setCopied(true);
+    // setTimeout(() => setCopied(false), 2000);
+
+    // костыльный способ копирования ссылки:
+    // Создаем временный элемент для копирования
+    const textArea = document.createElement('textarea');
+    textArea.value = publicUrl;
+    textArea.style.position = 'fixed';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      // Пытаемся скопировать через execCommand (работает в HTTP)
+      const successful = document.execCommand('copy');
+      if (successful) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        console.error('Copy failed using execCommand');
+        // Альтернативный метод для современных браузеров
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(publicUrl).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Copy error:', err);
+      setCopyError('Не удалось скопировать ссылку');
+      setTimeout(() => setCopyError(null), 3000);
+    } finally {
+      // Удаляем временный элемент
+      document.body.removeChild(textArea);
+    }
   };
 
   return (
@@ -177,6 +215,11 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
           >
             {copied ? <FaCheck className="text-green-500" /> : <FaCopy />}
           </button>
+          {copyError && (
+            <div className="text-red-500 text-xs mt-1">
+              {copyError}
+            </div>
+          )}
         </div>
       </td>
 

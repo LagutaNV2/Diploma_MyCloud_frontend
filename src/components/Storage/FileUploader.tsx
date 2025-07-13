@@ -1,5 +1,3 @@
-// src/components/Storage/FileUploader.tsx
-
 import React, { useState } from 'react';
 import { useAppDispatch } from '../../store/hooks';
 import { uploadFile } from '../../store/slices/fileSlice';

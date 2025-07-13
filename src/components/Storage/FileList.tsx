@@ -1,5 +1,3 @@
-// src/components/Storage/FileList.tsx
-
 import React from 'react';
 import { useAppSelector } from '../../store/hooks';
 import FileItem from './FileItem';

@@ -1,5 +1,3 @@
-// cloud_storage/frontend/src/store/slices/userSlice.ts
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/apiUtils';
 import type { User } from '../../types/userTypes';

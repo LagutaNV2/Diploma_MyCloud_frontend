@@ -1,5 +1,3 @@
-// src/store/slices/fileSlice.ts
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import api from '../../utils/apiUtils';

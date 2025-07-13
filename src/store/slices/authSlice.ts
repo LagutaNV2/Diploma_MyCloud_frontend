@@ -1,5 +1,3 @@
-// src/store/slices/authSlice.ts
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import axios from '../../utils/apiUtils';
@@ -95,7 +93,6 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<User>) => {
-        // state.user = action.payload;
         state.user = action.payload.user || action.payload;
         state.isAuthenticated = true;
         state.loading = false;
@@ -116,9 +113,6 @@ const authSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload
-        // state.error = typeof action.payload === 'string'
-        //   ? action.payload
-        //   : (action.error.message ?? null);
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;

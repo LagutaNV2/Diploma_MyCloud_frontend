@@ -1,4 +1,3 @@
-// File: cloud_storage/frontend/src/types/authTypes.ts
 import type { User } from './userTypes';
 
 export interface AuthState {

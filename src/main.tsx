@@ -1,5 +1,4 @@
-// File: cloud_storage/frontend/src/main.tsx
-import React from 'react';
+// import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
@@ -14,7 +13,7 @@ const rootElement = createRoot(container!);
 if (rootElement) {
   rootElement.render(
     <Provider store={store}>
-      <BrowserRouter basename="/Diploma_MyCloud_frontend">
+      <BrowserRouter basename="/">
         <App />
       </BrowserRouter>
     </Provider>
