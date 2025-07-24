@@ -101,102 +101,108 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto form-container">
-      <h2 className="text-2xl font-bold mb-6 text-center">Регистрация</h2>
+    <div className="container">
+      <div className="form-container">
+        <h2 className="text-2xl font-bold mb-6 text-center">Регистрация</h2>
 
-      {errors.general && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {errors.general}
-        </div>
-      )}
+        {errors.general && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {errors.general}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          {/* Необязательные поля */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-          <label className="block mb-1 font-medium">Имя</label>
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
+            {/* Необязательные поля */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-1 font-medium">Имя</label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
 
-        <div>
-          <label className="block mb-1 font-medium">Фамилия</label>
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
+              <div>
+                <label className="block mb-1 font-medium">Фамилия</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+            </div>
 
-          {/* Обязательные поля */}
-          <label className="block mb-1 font-medium required-field">Логин</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className={`w-full p-2 border rounded ${errors.username ? 'border-red-500' : 'border-gray-300'}`}
-            required
-          />
-          {errors.username && (
-            <p className="error-text">{errors.username}</p>
-          )}
-        </div>
+            {/* Обязательные поля */}
+            <label className="block mb-1 font-medium required-field">Логин</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className={`w-full p-2 border rounded ${errors.username ? 'border-red-500' : 'border-gray-300'}`}
+              required
+            />
+            {errors.username && (
+              <p className="error-text">{errors.username}</p>
+            )}
+          </div>
 
-        <div>
-          <label className="block mb-1 font-medium required-field">Email</label>
-          <input
-            type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={`w-full p-2 border rounded ${
-              errors.email ? 'border-red-500' : 'border-gray-300'
-            }`}
-            required
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-          )}
-        </div>
+          <div>
+            <label className="block mb-1 font-medium required-field">Email</label>
+            <input
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={`w-full p-2 border rounded ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
+              required
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
+          </div>
 
-        <div className="relative">
-          <label className="block mb-1 font-medium required-field">Пароль</label>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={`w-full p-2 border rounded ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
-            required
-          />
+          <div className="relative">
+            <label className="block mb-1 font-medium required-field">Пароль</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`w-full p-2 border rounded pr-10 ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
+              required
+            />
+            <button
+              type="button"
+              className="password-toggle absolute right-3 top-[calc(50%+0.5rem)] transform -translate-y-1/2 text-gray-500"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              <span className="password-toggle-icon">
+                {showPassword ? '👁️' : <span className="strikethrough">👁️</span>}
+              </span>
+            </button>
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
+          </div>
           <button
-            type="button"
-            className="absolute right-3 top-8 text-gray-500"
-            onClick={() => setShowPassword(!showPassword)}
+            type="submit"
+            className="btn-primary mx-auto block w-64 text-white py-2 px-6 rounded-lg mt-8"
           >
-            {showPassword ? '👁️' : <span className="strikethrough">👁️</span>}
+            Зарегистрироваться
           </button>
-          {errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-          )}
-        </div>
-        <button
-          type="submit"
-          className="btn-primary mx-auto block w-64 text-white py-2 px-6 rounded-lg mt-8"
-        >
-          Зарегистрироваться
-        </button>
-        <div> Поля, отмеченные <span className="text-red-500 font-bold">*</span>, обязательны для заполнения</div>
-      </form>
+          <div> Поля, отмеченные <span className="text-red-500 font-bold">*</span>, обязательны для заполнения</div>
+        </form>
 
-      <div className="mt-4 text-center">
-        <p>
-          Уже есть аккаунт?{' '}
-          <Link to="/login" className="text-blue-600 hover:underline">Войти</Link>
-        </p>
+        <div className="mt-4 text-center">
+          <p>
+            Уже есть аккаунт?{' '}
+            <Link to="/login" className="text-blue-600 hover:underline">Войти</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
