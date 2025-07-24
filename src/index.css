@@ -28,6 +28,10 @@ body {
   background-color: #cacacf;
   color: #333;
 }
+h2 {
+  font-size: 1.5rem;
+  padding: 0.3rem;
+}
 main {
   flex: 1;
   padding-bottom: var(--footer-height);
