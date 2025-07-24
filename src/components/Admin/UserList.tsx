@@ -1,12 +1,19 @@
-import React from 'react';
-import { useAppSelector } from '../../store/hooks';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAppSelector,  useAppDispatch } from '../../store/hooks';
 import UserItem from './UserItem';
 import { formatBytes } from '../../utils/formatUtils';
+import { fetchUsers, deleteUser, updateUserAdminStatus } from '../../store/slices/userSlice';
 
 
 const UserList: React.FC = () => {
   const { users, loading, error } = useAppSelector(state => state.users);
+  const dispatch = useAppDispatch();
   console.log('Users:', users);
+
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, [dispatch]);
 
   const totalStorageBytes = users.reduce(
     (sum, user) => sum + (user.total_file_size || 0),
@@ -25,7 +32,8 @@ const UserList: React.FC = () => {
         <p>Общий объем хранилища: <span className="font-bold">{formattedTotalStorage}</span></p>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Десктопная версия */}
+      <div className="desktop-only overflow-x-auto">
         <table className="min-w-full bg-white">
           <thead>
             <tr>
@@ -46,6 +54,64 @@ const UserList: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Мобильная версия */}
+      <div className="mobile-only">
+        {users.map(user => (
+          <div key={user.id} className="responsive-card bg-white mb-4">
+            <div className="card-row">
+              <span className="card-label">Логин:</span>
+              <span>{user.username}</span>
+            </div>
+
+            <div className="card-row">
+              <span className="card-label">Email:</span>
+              <span>{user.email}</span>
+            </div>
+
+            <div className="card-row">
+              <span className="card-label">Имя:</span>
+              <span>{user.first_name}</span>
+            </div>
+
+            <div className="card-row">
+              <span className="card-label">Фамилия:</span>
+              <span>{user.last_name}</span>
+            </div>
+
+            <div className="card-row">
+              <span className="card-label">Администратор:</span>
+              <span>{user.is_admin ? 'Да' : 'Нет'}</span>
+            </div>
+
+            <div className="card-row">
+              <span className="card-label">Файлов:</span>
+              <span>{user.file_count}</span>
+            </div>
+
+            <div className="card-row">
+              <span className="card-label">Объем:</span>
+              <span>{user.formatted_total_file_size ?? 0}</span>
+            </div>
+
+            <div className="mt-3 flex justify-between">
+              <Link
+                to={`/storage?user=${user.id}`}
+                className="bg-blue-500 text-white px-3 py-1 rounded"
+              >
+                Хранилище
+              </Link>
+              <button
+                onClick={() => dispatch(deleteUser(user.id))}
+                className="bg-red-500 text-white px-3 py-1 rounded"
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 };

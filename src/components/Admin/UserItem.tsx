@@ -59,7 +59,7 @@ const UserItem: React.FC<UserItemProps> = ({ user }) => {
       {/* Действия */}
 
       <td className="actions-column">
-        <div className="relative">
+        <div className="relative flex items-center gap-3">
           <Link
             to={`/storage?user=${user.id}`}
             className="text-blue-600 hover:underline"

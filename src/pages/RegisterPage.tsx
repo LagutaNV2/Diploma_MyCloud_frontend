@@ -101,11 +101,11 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto py-12">
+    <div className="max-w-md mx-auto form-container">
       <h2 className="text-2xl font-bold mb-6 text-center">Регистрация</h2>
 
       {errors.general && (
-        <div className="bg-red-600 text-white font-bold px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {errors.general}
         </div>
       )}
@@ -134,7 +134,7 @@ const RegisterPage: React.FC = () => {
         </div>
 
           {/* Обязательные поля */}
-          <label className="block mb-1 font-medium">Логин*</label>
+          <label className="block mb-1 font-medium required-field">Логин</label>
           <input
             type="text"
             value={username}
@@ -148,7 +148,7 @@ const RegisterPage: React.FC = () => {
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">Email*</label>
+          <label className="block mb-1 font-medium required-field">Email</label>
           <input
             type="text"
             value={email}
@@ -159,12 +159,12 @@ const RegisterPage: React.FC = () => {
             required
           />
           {errors.email && (
-            <p className="error-text">{errors.email}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
           )}
         </div>
 
         <div className="relative">
-          <label className="block mb-1 font-medium">Пароль*</label>
+          <label className="block mb-1 font-medium required-field">Пароль</label>
           <input
             type={showPassword ? 'text' : 'password'}
             value={password}
@@ -180,16 +180,16 @@ const RegisterPage: React.FC = () => {
             {showPassword ? '👁️' : <span className="strikethrough">👁️</span>}
           </button>
           {errors.password && (
-            <p className="error-text">{errors.password}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
           )}
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          className="btn-primary mx-auto block w-64 text-white py-2 px-6 rounded-lg mt-8"
         >
           Зарегистрироваться
         </button>
-        <div> * поле обязательно для заполнения</div>
+        <div> Поля, отмеченные <span className="text-red-500 font-bold">*</span>, обязательны для заполнения</div>
       </form>
 
       <div className="mt-4 text-center">

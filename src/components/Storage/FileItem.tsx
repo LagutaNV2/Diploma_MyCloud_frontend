@@ -1,77 +1,66 @@
 import React, { useState } from 'react';
 import { FaCopy, FaCheck, FaEdit, FaTimes  } from 'react-icons/fa';
-import type { File } from '../../types/fileTypes';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { deleteFile, downloadFile, updateFile, previewFile } from '../../store/slices/fileSlice';
+import {
+  handleDownload,
+  handleDelete,
+  handleRename,
+  handleCommentUpdate,
+  handlePreview,
+  formatBytes,
+  formatDate
+} from '../../utils/fileUtils';
+import type { File } from '../../types/fileTypes';
+
 
 interface FileItemProps {
   file: File;
 }
 
-const formatBytes = (bytes: number, decimals = 2) => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString();
-};
-
 const FileItem: React.FC<FileItemProps> = ({ file }) => {
+  const dispatch = useAppDispatch();
   const [copied, setCopied] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(file.original_name);
   const [isEditingComment, setIsEditingComment] = useState(false);
   const [newComment, setNewComment] = useState(file.comment);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [copyError, setCopyError] = useState<string | null>(null);
-  const dispatch = useAppDispatch();
 
-
-  const handleDownload = () => {
-    dispatch(downloadFile({ fileId: file.id, fileName: file.original_name }));
+  const onRename = async () => {
+    await handleRename(
+      dispatch,
+      file.id,
+      newName,
+      setIsRenaming,
+      setNewName
+    );
   };
 
-  const handleDelete = () => {
-    if (window.confirm('Вы уверены, что хотите удалить файл?')) {
-      dispatch(deleteFile(file.id));
-    }
+  const onCommentUpdate = async () => {
+    await handleCommentUpdate(
+      dispatch,
+      file.id,
+      newComment,
+      setIsEditingComment,
+      setNewComment
+    );
   };
 
-  const handleRename = async () => {
-    if (newName.trim() === '') {
-      alert('Имя файла не может быть пустым');
-      return;
-    }
-    try {
-      await dispatch(updateFile({ fileId: file.id, updatedData: { original_name: newName } })).unwrap();
-      setIsRenaming(false);
-    } catch (err) {
-      alert('Ошибка при переименовании файла');
-    }
-  };
+  const onDownload = () => handleDownload(dispatch, file.id, file.original_name);
+  const onDelete = () => handleDelete(dispatch, file.id);
 
-  const handleCommentUpdate = async () => {
-    try {
-      await dispatch(updateFile({ fileId: file.id, updatedData: { comment: newComment } })).unwrap();
-      setIsEditingComment(false);
-    } catch (err) {
-      alert('Ошибка при обновлении комментария');
-    }
-  };
+  // const onPreview = () => handlePreview(dispatch, file.id, setPreviewUrl);
 
-  const handlePreview = async () => {
-    try {
-      const url = await dispatch(previewFile({ fileId: file.id })).unwrap();
-      setPreviewUrl(url);
-      window.open(url, '_blank'); // Открывает файл в новой вкладке
-    } catch (err) {
-      alert('Ошибка при попытке просмотреть файл');
-    }
-  };
+  const onPreview = async () => {
+  try {
+    const url = await handlePreview(dispatch, file.id);
+    window.open(url, '_blank');
+  } catch (err) {
+    alert('Ошибка предпросмотра');
+  }
+};
+
 
   const copyPublicLink = () => {
     const publicUrl = `${window.location.origin}/api/storage/public/${file.public_link}/`;
@@ -132,7 +121,7 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
             />
              <div className="flex items-center space-x-2">
               <button
-                onClick={handleRename}
+                onClick={onRename}
                 className="bg-green-500 text-white px-2 py-1 rounded flex items-center"
               >
                 <FaCheck className="mr-1" />
@@ -147,10 +136,12 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <div>{file.original_name}</div>
+            <div className="truncate overflow-hidden pr-2 max-w-[200px]">
+              {file.original_name}
+            </div>
             <button
               onClick={() => setIsRenaming(true)}
-              className="ml-auto text-blue-500 hover:text-blue-700"
+              className="ml-auto text-blue-500 hover:text-blue-700 flex-shrink-0"
             >
               <FaEdit />
             </button>
@@ -159,17 +150,18 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
       </td>
 
       {/* Комментарий */}
-      <td>
+      <td className="min-w-[200px] max-w-[300px]">
         {isEditingComment ? (
           <div className="flex items-center justify-between">
-            <textarea
+            <input
+              type="text"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               className="border rounded p-1 mr-2 flex-grow"
             />
             <div className="flex items-center space-x-2">
               <button
-                onClick={handleCommentUpdate}
+                onClick={onCommentUpdate}
                 className="bg-green-500 text-white px-2 py-1 rounded flex items-center"
               >
                 <FaCheck className="mr-1" />
@@ -184,10 +176,15 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <div>{file.comment || 'Нет комментария'}</div>
+            <div
+              className="truncate overflow-hidden pr-2 flex-grow"
+              title={file.comment}
+            >
+              {file.comment || 'Нет комментария'}
+            </div>
             <button
               onClick={() => setIsEditingComment(true)}
-              className="ml-auto text-blue-500 hover:text-blue-700"
+              className="ml-2 text-blue-500 hover:text-blue-700 flex-shrink-0"
             >
               <FaEdit />
             </button>
@@ -227,19 +224,19 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
       <td className="actions-column">
         <div className="flex flex-col space-y-2">
           <button
-            onClick={handleDownload}
+            onClick={onDownload}
             className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
           >
             Скачать
           </button>
           <button
-            onClick={handlePreview}
+            onClick={onPreview}
             className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
           >
             Просмотреть
           </button>
           <button
-            onClick={handleDelete}
+            onClick={onDelete}
             className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors"
           >
             Удалить

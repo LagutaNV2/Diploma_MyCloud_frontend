@@ -20,6 +20,10 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader']
+      },
+      {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
         use: {
@@ -43,14 +47,13 @@ module.exports = {
       {
         test: /\.(png|jpe?g|gif|svg|ico)$/i,
         type: 'asset/resource'
-      }
+      },
     ]
   },
   plugins: [
-    new CleanWebpackPlugin(),
+    // new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './index.html',
-      // favicon: './public/favicon.ico'
       favicon: path.resolve(__dirname, 'public', 'favicon.ico'),
     })
   ]

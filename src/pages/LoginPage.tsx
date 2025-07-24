@@ -36,7 +36,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto py-12">
+    <div className="max-w-md mx-auto form-container">
       <h2 className="text-2xl font-bold mb-6 text-center">Вход в систему</h2>
 
       {error && (
@@ -47,7 +47,7 @@ const LoginPage: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1 font-medium">Логин</label>
+          <label className="block mb-1 font-medium required-field">Логин</label>
           <input
             type="text"
             value={username}
@@ -58,7 +58,7 @@ const LoginPage: React.FC = () => {
         </div>
 
         <div className="relative">
-          <label className="block mb-1 font-medium">Пароль</label>
+          <label className="block mb-1 font-medium required-field">Пароль</label>
           <input
             type={showPassword ? 'text' : 'password'}
             value={password}
@@ -78,12 +78,13 @@ const LoginPage: React.FC = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full bg-blue-600 text-white py-2 rounded ${
+          className={`btn-primary mx-auto block w-64 text-white py-2 px-6 rounded-lg mt-8 ${
             loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
           }`}
         >
           {loading ? 'Вход...' : 'Войти'}
         </button>
+        <div> Поля, отмеченные <span className="text-red-500 font-bold">*</span>, обязательны для заполнения</div>
       </form>
 
       <div className="mt-4 text-center">

@@ -2,6 +2,7 @@ const path = require('path');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common');
 const Dotenv = require('dotenv-webpack');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = merge(common, {
   mode: 'development',
@@ -9,14 +10,18 @@ module.exports = merge(common, {
   output: {
     clean: false,
   },
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader']
-      }
-    ]
-  },
+  // module: {
+  //   rules: [
+  //     {
+  //       test: /\.css$/,
+  //       use: [
+  //         'style-loader',
+  //         'css-loader',
+  //         'postcss-loader',
+  //       ]
+  //     }
+  //   ]
+  // },
   devServer: {
     static: {
       // directory: path.join(__dirname, 'dist'),
@@ -53,6 +58,9 @@ module.exports = merge(common, {
     },
   },
   plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].[contenthash].css'
+    }),
     new Dotenv({
       path: '.env',
       systemvars: true,

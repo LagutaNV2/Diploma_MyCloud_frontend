@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 :root {
   --footer-height: 60px;
 }
@@ -45,6 +50,19 @@ button:hover {
   opacity: 0.9;
   transform: translateY(-2px);
 }
+.btn-primary {
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(37, 99, 235, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
 .strikethrough {
   text-decoration: line-through;
 }
@@ -77,7 +95,7 @@ input:focus, textarea:focus {
 }
 .nav-menu {
   display: flex;
-  gap: 24px;
+  gap: 1rem;
 }
 
 /* Стили таблиц */
@@ -175,4 +193,137 @@ tbody tr:hover {
   font-weight: bold;
   font-size: 0.875rem;
   margin-top: 0.25rem;
+}
+
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+
+  /* Бургер-меню */
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    max-height: 0;
+    padding-top: 20px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, transform 0.3s ease;
+  }
+
+  .nav-menu.active {
+    display: block;
+    max-height: 500px;
+    transform: translateY(0);
+  }
+
+  .burger-button {
+    display: block;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    .nav-menu {
+      position: absolute;
+      top: 1%;
+      left: 0;
+      right: 0;
+      background: #dee5edff;
+      padding: 1rem;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      transform: translateY(-100%);
+    }
+    .nav-menu.active {
+      padding: 1rem;
+      transform: translateY(0);
+      display: block;
+    }
+  }
+
+  /* Адаптивные таблицы */
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .responsive-card {
+    display: block;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .responsive-card .card-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+
+  .responsive-card .card-label {
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  /* Формы */
+  .form-container {
+    padding: 15px;
+  }
+
+  /* Скрытие элементов */
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  /* Блок пользователя */
+  .user-info-mobile {
+    display: block;
+    margin-top: 15px;
+  }
+}
+
+@media (min-width: 769px) {
+  .burger-button {
+    display: none;
+  }
+
+  .mobile-only {
+    display: none;
+  }
+
+  .desktop-only {
+    display: block;
+  }
+}
+
+/* Обязательные поля */
+.required-field::after {
+  content: "*";
+  color: red;
+  margin-left: 3px;
+  font-weight: bold;
+}
+
+/* Адаптивные карточки */
+@media (max-width: 768px) {
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .py-12 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
 }
