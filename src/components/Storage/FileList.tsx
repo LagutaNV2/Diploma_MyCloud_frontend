@@ -26,7 +26,7 @@ const FileList: React.FC = () => {
   }, [dispatch, currentUser]);
 
   if (loading) return <div>Загрузка файлов...</div>;
-  if (error) return <div className="text-red-500">Ошибка: {error}</div>;
+  // if (error) return <div className="text-red-500">Ошибка загрузки файла</div>;
 
   return (
     <div>

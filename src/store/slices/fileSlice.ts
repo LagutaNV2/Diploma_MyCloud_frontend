@@ -8,7 +8,7 @@ import type { RootState } from '../store';
 interface FileState {
   files: File[];
   loading: boolean;
-  error: string | null;
+  error: Record<string, any> | string | null;
   uploadProgress: number;
 }
 
@@ -35,14 +35,24 @@ export const fetchFiles = createAsyncThunk(
 
 export const uploadFile = createAsyncThunk(
   'files/upload',
-  async ({ formData, onUploadProgress }: UploadConfig) => {
-    const response = await api.post('/storage/upload/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress,
-    });
-    return response.data;
+  async ({ formData, onUploadProgress }: UploadConfig, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/storage/upload/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress,
+      });
+      return response.data;
+    } catch (error: any) {
+      // Обработка структурированных ошибок валидации
+      if (error.response?.data) {
+        return rejectWithValue(error.response.data);
+      }
+      return rejectWithValue({
+        file: ['Произошла неизвестная ошибка при загрузке']
+      });
+    }
   }
 );
 
@@ -110,6 +120,9 @@ const fileSlice = createSlice({
         file.last_download = lastDownload;
       }
     },
+    clearFileError: (state) => {
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -135,7 +148,9 @@ const fileSlice = createSlice({
       })
       .addCase(uploadFile.rejected, (state, action) => {
         state.uploadProgress = 0;
-        state.error = action.error.message || 'Ошибка загрузки файла';
+        state.error = typeof action.payload === 'string'
+          ? action.payload
+          : action.error.message || 'Ошибка загрузки файла';
       })
       .addCase(deleteFile.fulfilled, (state, action: PayloadAction<string>) => {
         state.files = state.files.filter(file => file.id !== action.payload);
@@ -147,10 +162,38 @@ const fileSlice = createSlice({
         }
       })
       .addCase(updateFile.rejected, (state, action) => {
-        state.error = action.error.message || 'Ошибка обновления файла';
-      });
+        state.uploadProgress = 0;
+
+        // Извлекаем сообщение об ошибке из структуры response
+        if (action.payload && typeof action.payload === 'object') {
+
+          if (action.payload.file && Array.isArray(action.payload.file)) {
+            state.error = action.payload.file.join(', ');
+          } else {
+            state.error = Object.values(action.payload)
+              .flat()
+              .join(', ');
+          }
+        } else {
+          state.error = action.error.message || 'Ошибка загрузки файла';
+        }
+      })
+      .addMatcher(
+        (action) => [
+          fetchFiles.pending,
+          uploadFile.pending,
+          deleteFile.pending
+        ].includes(action.type),
+          (state) => {
+          state.error = null;
+        }
+      );
     },
   });
 
-export const { setUploadProgress, updateFileLastDownload } = fileSlice.actions;
+export const {
+  setUploadProgress,
+  updateFileLastDownload,
+  clearFileError
+} = fileSlice.actions;
 export default fileSlice.reducer;

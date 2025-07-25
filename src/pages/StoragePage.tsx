@@ -5,7 +5,7 @@ import type { TypedUseSelectorHook } from 'react-redux';
 import { FaBan } from 'react-icons/fa';
 import type { RootState } from '../store/store';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchFiles } from '../store/slices/fileSlice';
+import { fetchFiles, clearFileError } from '../store/slices/fileSlice';
 import api from '../utils/apiUtils';
 import FileList from '../components/Storage/FileList';
 import FileUploader from '../components/Storage/FileUploader';
@@ -23,12 +23,13 @@ const StoragePage: React.FC = () => {
   const { error } = useAppSelector(state => state.files);
 
   const isCurrentUser = !userId || (currentUser && currentUser.id === (userId));
-  // const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  console.log('Current user:', currentUser, 'Selected user ID:', userId, 'Is current user:', isCurrentUser);
+  // console.log('Current user:', currentUser, 'Selected user ID:', userId, 'Is current user:', isCurrentUser);
 
   useEffect(() => {
     const fetchData = async () => {
+      dispatch(clearFileError());
+
       if (userId) {
         try {
           const response = await api.get(`/auth/users/${userId}/`);
@@ -42,6 +43,10 @@ const StoragePage: React.FC = () => {
     };
     fetchData();
   }, [dispatch, userId]);
+
+  const handleClearError = () => {
+    dispatch(clearFileError());
+  };
 
   useEffect(() => {
     const loadFiles = async () => {
@@ -137,20 +142,26 @@ const StoragePage: React.FC = () => {
         </div>
       )}
 
+
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        {/* Кнопка сброса ошибки */}
         {error && (
           <div className="bg-red-50 border-b border-red-200 text-red-700 px-6 py-4">
-            <div className="flex items-center">
-              <FaBan className="text-red-400 mr-3" size={20} />
-              <span>Ошибка загрузки файлов: {error}</span>
-            </div>
+              <span className="text-red-400 mr-3 text-xl">⛔</span>
+              <div> Ошибка загрузки файлов </div>
+              <button
+                onClick={handleClearError}
+                className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+              >
+                Сбросить ошибку
+              </button>
           </div>
         )}
 
         {isCurrentUser && (
           <div className="p-6 border-b border-gray-100">
             <h2 className="text-lg font-semibold text-gray-800 mb-3">Загрузка нового файла</h2>
-            <FileUploader />
+            <FileUploader onClearError={handleClearError}/>
           </div>
         )}
 

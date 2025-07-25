@@ -45,16 +45,11 @@ const getCookie: GetCookie = (name: string): string | null => {
 
 // Перехватчик для обработки CSRF
 api.interceptors.request.use((config) => {
-  console.log('Request Headers:', config.headers);
 
-  // const token = document.cookie
-  //   .split('; ')
-  //   .find(row => row.startsWith('csrftoken='))
-  //   ?.split('=')[1];
   const token = getCookie('csrftoken');
 
   if (token && ['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase() || '')) {
-    // config.headers = {...config.headers, 'X-CSRFToken': token, 'Content-Type': 'application/json',};
+
     if (!(config.headers?.['Content-Type']?.startsWith('multipart/form-data'))) {
         config.headers = {
           ...config.headers,

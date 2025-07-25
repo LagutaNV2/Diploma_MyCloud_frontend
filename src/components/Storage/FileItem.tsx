@@ -50,8 +50,6 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
   const onDownload = () => handleDownload(dispatch, file.id, file.original_name);
   const onDelete = () => handleDelete(dispatch, file.id);
 
-  // const onPreview = () => handlePreview(dispatch, file.id, setPreviewUrl);
-
   const onPreview = async () => {
   try {
     const url = await handlePreview(dispatch, file.id);

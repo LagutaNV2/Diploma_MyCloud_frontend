@@ -1,19 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppDispatch } from '../../store/hooks';
-import { uploadFile } from '../../store/slices/fileSlice';
+import { uploadFile, clearFileError } from '../../store/slices/fileSlice';
 
-const FileUploader: React.FC = () => {
+interface FileUploaderProps {
+  onClearError: () => void;
+}
+
+const FileUploader: React.FC<FileUploaderProps> = ({ onClearError }) => {
   const [file, setFile] = useState<File | null>(null);
   const [comment, setComment] = useState('');
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const dispatch = useAppDispatch();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleChange');
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+      setError(null);
+      onClearError();
+      dispatch(clearFileError());
     }
   };
+
+  const handleClearError = () => {
+    setError(null);
+    setFile(null);
+    setComment('');
+    setProgress(0);
+  };
+
+  useEffect(() => {
+    handleClearError();
+  }, [onClearError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +41,11 @@ const FileUploader: React.FC = () => {
       setError('Выберите файл для загрузки');
       return;
     }
+
+    setError(null);
+    setProgress(0);
+    onClearError();
+    dispatch(clearFileError());
 
     const formData = new FormData();
     formData.append('file', file);
@@ -41,16 +65,58 @@ const FileUploader: React.FC = () => {
       setFile(null);
       setComment('');
       setProgress(0);
-      setError('');
+      setError(null);
+
     } catch (err: any) {
-      setError(err.message || 'Ошибка загрузки файла');
+      console.log('Full error object:', err);
+      let errorMessage = 'Ошибка загрузки файла';
+
+      const payload = err?.payload || err;
+      if (payload && typeof payload === 'object') {
+
+        if (payload.file && Array.isArray(payload.file)) {
+          errorMessage = payload.file.join(', ');
+        }
+
+        else {
+          const messages = Object.values(payload)
+            .filter((v) => Array.isArray(v))
+            .flat() // объединяем массивы в один
+            .join(', ');
+
+          if (messages) {
+            errorMessage = messages;
+          }
+        }
+      }
+      else if (typeof payload === 'string') {
+        errorMessage = payload;
+      }
+      // если payload не определен
+      else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      if (errorMessage.includes('большой') || errorMessage.includes('размер')) {
+        errorMessage = `⚠️ ${errorMessage}`;
+      }
+
+      setError(errorMessage);
+      setProgress(0);
     }
   };
 
   return (
     <div className="border rounded-lg p-4 bg-gray-50">
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-
+      {error && (
+        <div className={`mb-4 ${
+          error.includes('большой') || error.includes('размер') || error.includes('size') || error.includes('large')
+            ? 'text-red-600 font-bold text-lg'
+            : 'text-red-500'
+        }`}>
+          {error}
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-2 font-medium">Выберите файл</label>
@@ -95,9 +161,9 @@ const FileUploader: React.FC = () => {
 
         <button
           type="submit"
-          disabled={!file || progress > 0}
+          disabled={!file}
           className={`px-4 py-2 rounded ${
-            !file || progress > 0
+            !file
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700 text-white'
           }`}
