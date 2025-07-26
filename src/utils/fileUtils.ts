@@ -4,9 +4,50 @@ import type { AppDispatch } from '../store/store';
 import type { File } from '../types/fileTypes';
 import { deleteFile, downloadFile, updateFile, previewFile } from '../store/slices/fileSlice';
 
+// Функция для создания безопасного имени файла
+const sanitizeFileName = (fileName: string): string => {
+  // Удаляем диакритические знаки и заменяем спецсимволы
+  return fileName
+    .normalize('NFD') // Разбиваем акцентированные символы
+    .replace(/[\u0300-\u036f]/g, '') // Удаляем диакритические знаки
+    .replace(/[^\w\d\.\-]/g, '_') // Заменяем опасные символы
+    .replace(/\s+/g, '_'); // Заменяем пробелы на подчеркивания
+};
+
+
 // Функции для Redux-операций
-export const handleDownload = (dispatch: Dispatch, fileId: string, fileName: string) => {
-  dispatch(downloadFile({ fileId, fileName }) as any);
+export const handleDownload = async (
+  dispatch: AppDispatch,
+  fileId: string,
+  fileName: string
+) => {
+  try {
+    // безопасное имя файла
+    const safeFileName = sanitizeFileName(fileName);
+
+    const response = await dispatch(downloadFile({ fileId, fileName })).unwrap();
+
+    // временная ссылку для скачивания
+    const url = window.URL.createObjectURL(new Blob([response]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', safeFileName);
+
+    // Добавляем атрибут для обхода блокировки Chrome
+    link.setAttribute('data-safe-download', 'true');
+
+    document.body.appendChild(link);
+    link.click();
+
+    // Очистка ресурсов
+    setTimeout(() => {
+      if (link.parentNode) link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }, 100);
+  } catch (err) {
+    console.error('Download error:', err);
+    alert('Ошибка при скачивании файла');
+  }
 };
 
 export const handleDelete = (dispatch: Dispatch, fileId: string) => {

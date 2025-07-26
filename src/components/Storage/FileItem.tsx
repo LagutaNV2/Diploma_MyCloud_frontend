@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { FaCopy, FaCheck, FaEdit, FaTimes  } from 'react-icons/fa';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { deleteFile, downloadFile, updateFile, previewFile } from '../../store/slices/fileSlice';
+import {
+  deleteFile,
+  downloadFile,
+  updateFile,
+  previewFile
+} from '../../store/slices/fileSlice';
 import {
   handleDownload,
   handleDelete,
@@ -9,8 +14,9 @@ import {
   handleCommentUpdate,
   handlePreview,
   formatBytes,
-  formatDate
+  formatDate,
 } from '../../utils/fileUtils';
+import { copyToClipboard } from '../../utils/clipboardUtils';
 import type { File } from '../../types/fileTypes';
 
 
@@ -60,8 +66,11 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
 };
 
 
-  const copyPublicLink = () => {
-    const publicUrl = `${window.location.origin}/api/storage/public/${file.public_link}/`;
+  const copyPublicLink = async () => {
+    //const publicUrl = `${window.location.origin}/api/storage/public/${file.public_link}/`;
+    // Используем encodeURIComponent для обработки спецсимволов
+    const encodedLink = encodeURIComponent(file.public_link);
+    const publicUrl = `${window.location.origin}/api/storage/public/${encodedLink}/`;
 
     // navigator.clipboard.writeText(publicUrl);
     // setCopied(true);
@@ -69,39 +78,22 @@ const FileItem: React.FC<FileItemProps> = ({ file }) => {
 
     // костыльный способ копирования ссылки:
     // Создаем временный элемент для копирования
-    const textArea = document.createElement('textarea');
-    textArea.value = publicUrl;
-    textArea.style.position = 'fixed';
-    textArea.style.top = '0';
-    textArea.style.left = '0';
-    textArea.style.opacity = '0';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
 
     try {
-      // Пытаемся скопировать через execCommand (работает в HTTP)
-      const successful = document.execCommand('copy');
-      if (successful) {
+      // Используем асинхронный вызов
+      const success = await copyToClipboard(publicUrl);
+
+      if (success) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } else {
-        console.error('Copy failed using execCommand');
-        // Альтернативный метод для современных браузеров
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(publicUrl).then(() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          });
-        }
+        setCopyError('Не удалось скопировать ссылку');
+        setTimeout(() => setCopyError(null), 3000);
       }
     } catch (err) {
       console.error('Copy error:', err);
-      setCopyError('Не удалось скопировать ссылку');
+      setCopyError('Ошибка при копировании');
       setTimeout(() => setCopyError(null), 3000);
-    } finally {
-      // Удаляем временный элемент
-      document.body.removeChild(textArea);
     }
   };
 
